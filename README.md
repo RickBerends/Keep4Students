@@ -62,7 +62,13 @@ Everything is in `src/content/crawl.ts`. Append to `stops`:
 
 Restart (or redeploy) and it's live. The server validates the content at boot
 and refuses to start on a duplicate id, an empty question, or a stop with no
-answers — you find out at launch, not at 23:00 in a bar.
+answers — you find out at launch, not at 23:00 in a bar. It also prints a loud
+warning listing any stop whose riddle still says `PLACEHOLDER`, so half-written
+content can't quietly reach a real crawl.
+
+**The last stop has no `quiz`.** There's nowhere left to send anyone, so passing
+its challenge ends the crawl. Every other stop must have one — omitting a quiz
+mid-crawl is a boot error, because teams would have no way forward.
 
 **Answers are matched loosely.** Case, accents, punctuation and small typos are
 forgiven, so `Bet Koolen!`, `bet  koolen` and `bet kolen` all pass for
@@ -124,6 +130,12 @@ clearing the entire crawl.
 `maxAgeMinutes` defaults to 10 rather than a tighter window on purpose — a
 100MB video over pub 4G can take several minutes to upload, and a 2-minute
 window fails honest teams. Tighten it per challenge if you want.
+
+**Long challenges need a longer window.** The timestamp is when filming
+*started*, so a challenge that takes 20 minutes to perform will fail a
+10-minute freshness check even though the team did it honestly. The nacho bar
+uses `maxAgeMinutes: 90` for exactly this reason. Watch the file size too —
+a long video can hit `MAX_UPLOAD_MB`.
 
 If you want to force camera capture instead of allowing library picks, add
 `capture="environment"` to the file inputs in `src/views/play.ejs`. That makes

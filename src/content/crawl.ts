@@ -40,65 +40,73 @@ export const crawl: Crawl = {
     },
   },
 
+  // The bars are real and in walking order. The RIDDLES are not written yet --
+  // every `quiz` below is a placeholder, and the server prints a loud warning
+  // at boot listing them. Replace `question` and `answers` and it is playable.
   stops: [
     // ---------------------------------------------------------------------
-    // Stop 1 -- the seeded demo round. Real and playable as-is.
+    // Stop 1 -- where the crawl starts. Teams see this bar's name the moment
+    // they log in, so it doubles as the meeting point.
     // ---------------------------------------------------------------------
     {
       id: "stop-1",
-      name: "The first bar",
+      name: "Pizzabar Rijslust",
       challenge: {
-        prompt: "Upload a video of the whole team drinking a beer.",
+        prompt: 'Order a Birra Moretti and "set the table". Film it.',
         accept: "video",
         maxAgeMinutes: 10,
         minDurationSec: 3,
       },
       quiz: {
-        question: "Your next location is close to my street.",
-        answers: ["bet koolen"],
+        // TODO: riddle pointing at the Irish pub.
+        question: "PLACEHOLDER: write the riddle pointing at the Irish pub.",
+        answers: ["PLACEHOLDER irish pub"],
         hints: [
-          { text: "It is named after a person, not a thing.", requires: "shot" },
-          { text: "Two words. The first one is a woman's name.", requires: "beer" },
-          { text: "Bet ... Koolen. That is the whole answer.", requires: "selfie" },
+          { text: "PLACEHOLDER hint 1.", requires: "shot" },
+          { text: "PLACEHOLDER hint 2.", requires: "beer" },
+          { text: "PLACEHOLDER hint 3.", requires: "selfie" },
         ],
-        successText: "Correct. Get to Bet Koolen and order something regrettable.",
+      },
+    },
+
+    {
+      id: "stop-2",
+      name: "Irish pub",
+      challenge: {
+        prompt: 'Order a Guinness and "split the G". Film the first sip.',
+        accept: "video",
+        maxAgeMinutes: 10,
+        minDurationSec: 3,
+      },
+      quiz: {
+        // TODO: riddle pointing at the nacho bar.
+        question: "PLACEHOLDER: write the riddle pointing at the nacho bar.",
+        answers: ["PLACEHOLDER nacho bar"],
+        hints: [
+          { text: "PLACEHOLDER hint 1.", requires: "shot" },
+          { text: "PLACEHOLDER hint 2.", requires: "beer" },
+          { text: "PLACEHOLDER hint 3.", requires: "selfie" },
+        ],
       },
     },
 
     // ---------------------------------------------------------------------
-    // Stops 2+ are placeholders. Replace the prompts, answers and hints with
-    // your real bars, then delete this comment.
+    // Last stop: no quiz, because there is nowhere left to send anyone.
+    // Passing this challenge ends the crawl.
     // ---------------------------------------------------------------------
     {
-      id: "stop-2",
-      name: "Placeholder bar two",
-      challenge: {
-        prompt: "PLACEHOLDER: upload a photo of the team with a stranger.",
-        accept: "photo",
-        maxAgeMinutes: 10,
-      },
-      quiz: {
-        question: "PLACEHOLDER: write the riddle for bar three here.",
-        answers: ["placeholder two"],
-        hints: [
-          { text: "PLACEHOLDER hint 1.", requires: "shot" },
-          { text: "PLACEHOLDER hint 2.", requires: "selfie" },
-        ],
-      },
-    },
-    {
       id: "stop-3",
-      name: "Placeholder bar three",
+      name: "Nacho bar",
       challenge: {
-        prompt: "PLACEHOLDER: upload a video of the team's worst dance move.",
+        prompt:
+          "What's the accumulative sum of your numbers? Drink as many beers " +
+          "as your combined numbers before continuing. Film it.",
         accept: "video",
-        maxAgeMinutes: 10,
-        minDurationSec: 2,
-      },
-      quiz: {
-        question: "PLACEHOLDER: write the final riddle here.",
-        answers: ["placeholder three"],
-        hints: [{ text: "PLACEHOLDER hint 1.", requires: "beer" }],
+        // Deliberately loose: this one takes a while, and the freshness check
+        // reads when filming STARTED. A 10-minute window would fail a team
+        // that filmed the whole thing. See the README.
+        maxAgeMinutes: 90,
+        minDurationSec: 3,
       },
     },
   ],
