@@ -47,7 +47,13 @@ export interface Stop {
   /** Bar name. Only shown to the team once they have solved the way there. */
   name: string;
   challenge: Challenge;
-  quiz: Quiz;
+  /**
+   * The riddle pointing at the next bar. Optional ONLY on the last stop --
+   * there is nowhere left to send anyone, so passing its challenge ends the
+   * crawl. Every other stop must have one or the crawl cannot progress, and
+   * the server refuses to start.
+   */
+  quiz?: Quiz;
 }
 
 export interface Crawl {

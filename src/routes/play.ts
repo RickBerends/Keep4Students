@@ -78,7 +78,7 @@ playRouter.post("/api/upload", requireTeam, upload.single("media"), async (req, 
   if (kind === "CHALLENGE") {
     challenge = stop.challenge;
   } else {
-    const nextHint = stop.quiz.hints[row.hints_unlocked];
+    const nextHint = stop.quiz?.hints[row.hints_unlocked];
     if (!nextHint) {
       await cleanup();
       res.status(409).json({ error: "no_hints", message: "There are no hints left here." });

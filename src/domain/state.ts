@@ -107,10 +107,33 @@ export function completeChallenge(teamId: number, stopId: string): void {
   const row = selectStop.get(teamId, stopId);
   if (!row || row.phase !== "CHALLENGE") return;
 
+  const stop = stopByIndex(row.stop_index);
+  if (!stop) return;
+
+  const timestamp = now();
+
+  // The last stop has no riddle -- there is nowhere left to send anyone -- so
+  // passing its challenge ends the crawl rather than opening a quiz.
+  if (!stop.quiz) {
+    db.transaction(() => {
+      db.prepare(
+        `UPDATE team_stops SET phase = 'DONE', challenge_passed_at = ?, quiz_solved_at = ?
+         WHERE team_id = ? AND stop_id = ? AND phase = 'CHALLENGE'`,
+      ).run(timestamp, timestamp, teamId, stopId);
+      db.prepare(`UPDATE teams SET finished_at = ? WHERE id = ? AND finished_at IS NULL`).run(
+        timestamp,
+        teamId,
+      );
+    })();
+    logEvent(teamId, "CHALLENGE_PASSED", { stopId });
+    logEvent(teamId, "FINISHED");
+    return;
+  }
+
   db.prepare(
     `UPDATE team_stops SET phase = 'QUIZ', challenge_passed_at = ?
      WHERE team_id = ? AND stop_id = ? AND phase = 'CHALLENGE'`,
-  ).run(now(), teamId, stopId);
+  ).run(timestamp, teamId, stopId);
   logEvent(teamId, "CHALLENGE_PASSED", { stopId });
 }
 
@@ -125,7 +148,7 @@ export interface AnswerResult {
 export function submitAnswer(teamId: number, stopId: string, submitted: string): AnswerResult {
   const row = selectStop.get(teamId, stopId);
   const stop = row ? stopByIndex(row.stop_index) : undefined;
-  if (!row || !stop) return { correct: false };
+  if (!row || !stop?.quiz) return { correct: false };
 
   // Answering is only possible once the challenge is done, and only once.
   if (row.phase !== "QUIZ") return { correct: false };
@@ -178,7 +201,7 @@ export function submitAnswer(teamId: number, stopId: string, submitted: string):
 
 /** The hint a team would get next at this stop, or null if they have them all. */
 export function nextHintFor(stop: Stop, hintsUnlocked: number): Hint | null {
-  return stop.quiz.hints[hintsUnlocked] ?? null;
+  return stop.quiz?.hints[hintsUnlocked] ?? null;
 }
 
 /**
@@ -188,7 +211,7 @@ export function nextHintFor(stop: Stop, hintsUnlocked: number): Hint | null {
 export function unlockHint(teamId: number, stopId: string): string | null {
   const row = selectStop.get(teamId, stopId);
   const stop = row ? stopByIndex(row.stop_index) : undefined;
-  if (!row || !stop || row.phase !== "QUIZ") return null;
+  if (!row || !stop?.quiz || row.phase !== "QUIZ") return null;
 
   const hint = nextHintFor(stop, row.hints_unlocked);
   if (!hint) return null;
@@ -235,6 +258,11 @@ export function buildPlayerView(team: TeamRow): PlayerView {
         stopId: stop.id,
       },
     };
+  }
+
+  // Phase is only ever QUIZ for a stop that has one, but keep TS honest.
+  if (!stop.quiz) {
+    return { ...base, finished: true, finishText: crawl.finishText, phase: "DONE" };
   }
 
   const unlocked = stop.quiz.hints.slice(0, row.hints_unlocked).map((h) => h.text);
