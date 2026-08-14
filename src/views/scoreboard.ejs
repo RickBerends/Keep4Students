@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12121a">
+<meta http-equiv="refresh" content="20">
+<title><%= title %> · Scoreboard</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <strong>Scoreboard</strong>
+    <nav><a href="/play">Back to the game</a></nav>
+  </header>
+
+  <% if (teams.length === 0) { %>
+    <p class="muted">Nobody has started yet.</p>
+  <% } else { %>
+    <table class="score">
+      <thead>
+        <tr><th>#</th><th>Team</th><th>Stop</th><th>Hints</th></tr>
+      </thead>
+      <tbody>
+        <% teams.forEach(function (team, i) { %>
+          <tr class="<%= team.teamId === myTeamId ? 'me' : '' %>">
+            <td><%= i + 1 %></td>
+            <td>
+              <%= team.name %>
+              <% if (team.teamId === myTeamId) { %><span class="muted">(you)</span><% } %>
+            </td>
+            <td>
+              <% if (team.finishedAt) { %>
+                Finished
+              <% } else { %>
+                <%= team.stopNumber %> / <%= team.stopCount %>
+              <% } %>
+            </td>
+            <td><%= team.hintsUsed %></td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+    <p class="muted">Refreshes every 20 seconds.</p>
+  <% } %>
+
+</div>
+</body>
+</html>

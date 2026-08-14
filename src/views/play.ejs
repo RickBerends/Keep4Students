@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#12121a">
+<title><%= title %></title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div>
+      <strong><%= view.team.name %></strong>
+      <% if (!view.finished) { %>
+        <span class="muted">· stop <%= view.stopNumber %> of <%= view.stopCount %></span>
+      <% } %>
+    </div>
+    <nav>
+      <a href="/scoreboard">Scoreboard</a>
+      <form method="post" action="/logout" class="inline">
+        <button type="submit" class="link">Leave</button>
+      </form>
+    </nav>
+  </header>
+
+  <% if (view.finished) { %>
+
+    <h1>Done.</h1>
+    <p class="big"><%= view.finishText %></p>
+
+  <% } else if (view.phase === 'CHALLENGE') { %>
+
+    <h1>Challenge</h1>
+    <p class="big"><%= view.challenge.prompt %></p>
+
+    <form class="upload-form stack"
+          data-kind="CHALLENGE"
+          data-accept="<%= view.challenge.accept %>">
+      <input type="file" name="media" required
+             accept="<%= view.challenge.accept === 'photo' ? 'image/*' : (view.challenge.accept === 'video' ? 'video/*' : 'image/*,video/*') %>">
+      <button type="submit">Upload</button>
+      <div class="progress" hidden><div class="bar"></div></div>
+      <p class="alert" hidden></p>
+    </form>
+
+  <% } else { %>
+
+    <h1>Where next?</h1>
+    <p class="big"><%= view.quiz.question %></p>
+
+    <% if (view.quiz.hints.length > 0) { %>
+      <ul class="hints">
+        <% view.quiz.hints.forEach(function (hint, i) { %>
+          <li><span class="muted">Hint <%= i + 1 %>:</span> <%= hint %></li>
+        <% }); %>
+      </ul>
+    <% } %>
+
+    <form class="answer-form stack">
+      <label>
+        Next location
+        <input name="answer" autocomplete="off" autocapitalize="none"
+               autocorrect="off" spellcheck="false" required>
+      </label>
+      <button type="submit">Submit answer</button>
+      <p class="alert" hidden></p>
+    </form>
+
+    <% if (view.quiz.nextHintCost) { %>
+      <section class="hint-buy">
+        <h2>Need a hint?</h2>
+        <p><%= view.quiz.nextHintCost.prompt %></p>
+        <p class="muted"><%= view.quiz.hintsRemaining %> hint<%= view.quiz.hintsRemaining === 1 ? '' : 's' %> left here.</p>
+        <form class="upload-form stack"
+              data-kind="HINT"
+              data-side-challenge="<%= view.quiz.nextHintCost.type %>"
+              data-accept="<%= view.quiz.nextHintCost.accept %>">
+          <input type="file" name="media" required
+                 accept="<%= view.quiz.nextHintCost.accept === 'photo' ? 'image/*' : (view.quiz.nextHintCost.accept === 'video' ? 'video/*' : 'image/*,video/*') %>">
+          <button type="submit">Upload for a hint</button>
+          <div class="progress" hidden><div class="bar"></div></div>
+          <p class="alert" hidden></p>
+        </form>
+      </section>
+    <% } else { %>
+      <p class="muted">No hints left. You're on your own.</p>
+    <% } %>
+
+  <% } %>
+
+</div>
+
+<script>
+  window.__STATE_SIGNATURE__ = <%- JSON.stringify(
+    view.finished ? 'finished' : view.stopNumber + ':' + view.phase + ':' + (view.quiz ? view.quiz.hints.length : 0)
+  ) %>;
+</script>
+<script src="/app.js"></script>
+</body>
+</html>

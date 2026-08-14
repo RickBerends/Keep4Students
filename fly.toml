@@ -1,0 +1,42 @@
+# Rename `app` to something unique before `fly launch`.
+app = "pubcrawl"
+primary_region = "ams"
+
+[build]
+  dockerfile = "Dockerfile"
+
+[env]
+  PORT = "3000"
+  DATA_DIR = "/data"
+  MAX_UPLOAD_MB = "400"
+
+# The SQLite database and all uploaded media live here. Create it with:
+#   fly volumes create crawl_data --size 20 --region ams
+[[mounts]]
+  source = "crawl_data"
+  destination = "/data"
+
+[http_service]
+  internal_port = 3000
+  force_https = true
+  # Never stop the machine: a suspended app during a pubcrawl is a dead game,
+  # and the whole point of not running this off a laptop was reliability.
+  auto_stop_machines = false
+  auto_start_machines = true
+  min_machines_running = 1
+
+  [http_service.concurrency]
+    type = "requests"
+    soft_limit = 50
+    hard_limit = 100
+
+[[http_service.checks]]
+  grace_period = "10s"
+  interval = "30s"
+  method = "GET"
+  path = "/healthz"
+  timeout = "5s"
+
+[[vm]]
+  size = "shared-cpu-1x"
+  memory = "512mb"

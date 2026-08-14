@@ -1,0 +1,110 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title><%= title %> · Admin</title>
+<link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+<div class="wrap wide">
+
+  <header class="topbar">
+    <strong>Admin</strong>
+    <span class="muted">Event code: <code><%= eventCode %></code></span>
+  </header>
+
+  <h2>Teams</h2>
+  <% if (teams.length === 0) { %>
+    <p class="muted">No teams yet.</p>
+  <% } else { %>
+    <table class="score">
+      <thead>
+        <tr><th>Team</th><th>Stop</th><th>Phase</th><th>Hints</th><th>Started</th><th></th></tr>
+      </thead>
+      <tbody>
+        <% teams.forEach(function (team) { %>
+          <tr>
+            <td><%= team.name %></td>
+            <td><%= team.finishedAt ? 'Finished' : team.stopNumber + ' / ' + team.stopCount %></td>
+            <td><%= team.phase %></td>
+            <td><%= team.hintsUsed %></td>
+            <td class="muted"><%= new Date(team.startedAt).toLocaleTimeString() %></td>
+            <td class="actions">
+              <form method="post" action="/admin/teams/<%= team.teamId %>/advance" class="inline">
+                <button type="submit" class="link">Skip challenge</button>
+              </form>
+              <form method="post" action="/admin/teams/<%= team.teamId %>/reset" class="inline"
+                    onsubmit="return confirm('Reset <%= team.name %> back to stop 1?')">
+                <button type="submit" class="link danger">Reset</button>
+              </form>
+            </td>
+          </tr>
+        <% }); %>
+      </tbody>
+    </table>
+  <% } %>
+
+  <h2>Uploads</h2>
+  <% if (uploads.length === 0) { %>
+    <p class="muted">Nothing uploaded yet.</p>
+  <% } else { %>
+    <div class="gallery">
+      <% uploads.forEach(function (up) { %>
+        <figure class="card <%= up.accepted ? (up.flagged ? 'flagged' : 'ok') : 'rejected' %>">
+          <% if (up.accepted && up.stored_key) { %>
+            <% if ((up.mime || '').indexOf('video') === 0) { %>
+              <video src="/admin/uploads/<%= up.id %>" controls preload="metadata"></video>
+            <% } else { %>
+              <img src="/admin/uploads/<%= up.id %>" alt="" loading="lazy">
+            <% } %>
+          <% } else { %>
+            <div class="placeholder">rejected</div>
+          <% } %>
+          <figcaption>
+            <strong><%= up.team_name %></strong>
+            <span class="muted">
+              <%= up.stop_id %> ·
+              <%= up.kind === 'HINT' ? 'hint: ' + (up.side_challenge_type || '?') : 'challenge' %>
+            </span>
+            <div class="muted small">
+              <%= new Date(up.created_at).toLocaleTimeString() %>
+              <% if (up.size) { %>· <%= Math.round(up.size / 1024 / 1024 * 10) / 10 %>MB<% } %>
+              <% if (up.mime) { %>· <%= up.mime %><% } %>
+            </div>
+            <% if (up.reject_reason) { %>
+              <div class="tag bad"><%= up.reject_reason %></div>
+            <% } %>
+            <% if (up.flagged && up.flag_reason) { %>
+              <div class="tag warn"><%= up.flag_reason %></div>
+            <% } %>
+            <% if (up.accepted && up.stored_key) { %>
+              <a href="/admin/uploads/<%= up.id %>" download class="small">download</a>
+            <% } %>
+          </figcaption>
+        </figure>
+      <% }); %>
+    </div>
+  <% } %>
+
+  <h2>Timeline</h2>
+  <% if (events.length === 0) { %>
+    <p class="muted">Nothing has happened yet.</p>
+  <% } else { %>
+    <ol class="timeline">
+      <% events.forEach(function (ev) { %>
+        <li>
+          <span class="muted small"><%= new Date(ev.created_at).toLocaleTimeString() %></span>
+          <strong><%= ev.team_name || '-' %></strong>
+          <code><%= ev.type %></code>
+          <% if (ev.payload_json && ev.payload_json !== '{}') { %>
+            <span class="muted small"><%= ev.payload_json %></span>
+          <% } %>
+        </li>
+      <% }); %>
+    </ol>
+  <% } %>
+
+</div>
+</body>
+</html>
