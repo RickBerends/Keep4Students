@@ -39,6 +39,11 @@ export interface PlayerView {
   finishText?: string;
   stopNumber: number; // 1-based, for display
   stopCount: number;
+  /**
+   * The bar the team is standing in. Not a spoiler: they typed this name to
+   * get here, and on stop 1 it is how they know where to start.
+   */
+  stopName?: string;
   phase: Phase;
   challenge?: { prompt: string; accept: string; stopId: string };
   quiz?: {
@@ -223,6 +228,7 @@ export function buildPlayerView(team: TeamRow): PlayerView {
     return {
       ...base,
       finished: false,
+      stopName: stop.name,
       challenge: {
         prompt: stop.challenge.prompt,
         accept: stop.challenge.accept,
@@ -237,6 +243,7 @@ export function buildPlayerView(team: TeamRow): PlayerView {
   return {
     ...base,
     finished: false,
+    stopName: stop.name,
     quiz: {
       question: stop.quiz.question,
       stopId: stop.id,

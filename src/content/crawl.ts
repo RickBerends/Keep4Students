@@ -42,26 +42,27 @@ export const crawl: Crawl = {
 
   stops: [
     // ---------------------------------------------------------------------
-    // Stop 1 -- the seeded demo round. Real and playable as-is.
+    // Stop 1 -- where the crawl starts. Teams see this bar's name as soon as
+    // they log in, so it doubles as the meeting point.
     // ---------------------------------------------------------------------
     {
       id: "stop-1",
-      name: "The first bar",
+      name: "Pizzabar Rijslust",
       challenge: {
-        prompt: "Upload a video of the whole team drinking a beer.",
+        prompt: 'Order a Birra Moretti and "set the table". Film it.',
         accept: "video",
         maxAgeMinutes: 10,
         minDurationSec: 3,
       },
       quiz: {
-        question: "Your next location is close to my street.",
-        answers: ["bet koolen"],
+        // TODO: riddle pointing at bar 2, and the answer teams must type.
+        question: "PLACEHOLDER: write the riddle for bar two here.",
+        answers: ["placeholder one"],
         hints: [
-          { text: "It is named after a person, not a thing.", requires: "shot" },
-          { text: "Two words. The first one is a woman's name.", requires: "beer" },
-          { text: "Bet ... Koolen. That is the whole answer.", requires: "selfie" },
+          { text: "PLACEHOLDER hint 1.", requires: "shot" },
+          { text: "PLACEHOLDER hint 2.", requires: "beer" },
+          { text: "PLACEHOLDER hint 3.", requires: "selfie" },
         ],
-        successText: "Correct. Get to Bet Koolen and order something regrettable.",
       },
     },
 
